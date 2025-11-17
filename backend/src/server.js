@@ -9,27 +9,40 @@ import { connectDB } from "./lib/db.js";
 import { ENV } from "./lib/env.js";
 import { app, server } from "./lib/socket.js";
 
-const __dirname = path.resolve();
+import { fileURLToPath } from "url";
+
+// Fix __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const PORT = ENV.PORT || 3000;
 
-app.use(express.json({ limit: "5mb" })); // req.body
+// Middleware
+app.use(express.json({ limit: "5mb" }));
 app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
 app.use(cookieParser());
 
+// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-// make ready for deployment
+// ---------------------
+// 🟢 PRODUCTION SETUP
+// ---------------------
 if (ENV.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  const frontendPath = path.join(__dirname, "../../frontend/dist");
 
-  app.get("*", (_, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+  console.log("Serving frontend from:", frontendPath);
+
+  app.use(express.static(frontendPath));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(frontendPath, "index.html"));
   });
 }
 
+// Start server
 server.listen(PORT, () => {
-  console.log("Server running on port: " + PORT);
+  console.log("Server running on port:", PORT);
   connectDB();
 });
