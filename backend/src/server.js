@@ -30,16 +30,13 @@ app.use("/api/messages", messageRoutes);
 // 🟢 PRODUCTION SETUP
 // ---------------------
 if (ENV.NODE_ENV === "production") {
-  const frontendPath = path.join(__dirname, "../../frontend/dist");
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  console.log("Serving frontend from:", frontendPath);
-
-  app.use(express.static(frontendPath));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(frontendPath, "index.html"));
+  app.get("*", (_, res) => {
+    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
   });
 }
+
 
 // Start server
 server.listen(PORT, () => {
