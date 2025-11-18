@@ -9,34 +9,36 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: [ENV.CLIENT_URL],
+    origin: [
+      "http://localhost:5173",
+      "https://chatlify-80ig198le-faizals-projects-96c8bb70.vercel.app"
+    ],
     credentials: true,
   },
 });
 
-// apply authentication middleware to all socket connections
+// AUTH MIDDLEWARE
 io.use(socketAuthMiddleware);
 
-// we will use this function to check if the user is online or not
+// Online users map
+const userSocketMap = {}; // { userId: socketId }
+
+// Function to check if user is online
 export function getReceiverSocketId(userId) {
   return userSocketMap[userId];
 }
 
-// this is for storig online users
-const userSocketMap = {}; // {userId:socketId}
-
+// Socket connection handler
 io.on("connection", (socket) => {
-  console.log("A user connected", socket.user.fullName);
+  console.log("A user connected:", socket.user.fullName);
 
   const userId = socket.userId;
   userSocketMap[userId] = socket.id;
 
-  // io.emit() is used to send events to all connected clients
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
-  // with socket.on we listen for events from clients
   socket.on("disconnect", () => {
-    console.log("A user disconnected", socket.user.fullName);
+    console.log("A user disconnected:", socket.user.fullName);
     delete userSocketMap[userId];
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
