@@ -17,7 +17,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://chatlify.vercel.app",
+      "https://chatlify-80ig198le-faizals-projects-96c8bb70.vercel.app",
     ],
     credentials: true,
   })
